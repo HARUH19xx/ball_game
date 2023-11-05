@@ -1,3 +1,6 @@
+import { addScore, getScore } from "./CountScore.js";
+import { sizes } from "./Sizes.js";
+
 // 要素を取得
 const canvas = document.getElementById('canvas');
 
@@ -69,7 +72,6 @@ const ball_game = () => {
 
         // 新しいサイズを取得する関数
         function getNextSize(size) {
-            const sizes = [20, 24, 28, 32, 36];
             const index = sizes.indexOf(size);
             let nextSize = null;
             if (index < sizes.length - 1) {
@@ -85,7 +87,7 @@ const ball_game = () => {
 
                 const newSize = getNextSize(bodyA.circleRadius);
 
-                if (newSize && newSize <= 36) {
+                if (newSize && newSize <= sizes[sizes.length - 1]) {
 
                     // 衝突点から方向ベクトルを取得
                     const collisionNormal = Matter.Vector.normalise({
@@ -106,7 +108,7 @@ const ball_game = () => {
                     bodyB.gameObject.destroy();
                     this.matter.world.remove(bodyA);
                     this.matter.world.remove(bodyB);
-                } else if (bodyA.circleRadius === 36 && bodyB.circleRadius === 36) {
+                } else if (bodyA.circleRadius === sizes[sizes.length - 1] && bodyB.circleRadius === sizes[sizes.length - 1]) {
                     bodyA.gameObject.destroy();
                     bodyB.gameObject.destroy();
                     this.matter.world.remove(bodyA);
@@ -124,21 +126,20 @@ const ball_game = () => {
 
     function createBall(scene, x, y, size) {
         const colorsSizes = {
-            0xFF0000: 20,  // 赤
-            0x0000FF: 24,  // 青
-            0xFFFF00: 28,  // 黄
-            0x800080: 32,  // 紫
-            0x808080: 36   // 灰
+            0xFF0000: sizes[0],  // 赤
+            0x0000FF: sizes[1],  // 青
+            0xFFFF00: sizes[2],  // 黄
+            0x800080: sizes[3],  // 紫
+            0x808080: sizes[4]   // 灰
         };
 
         const colors = Object.keys(colorsSizes);
         const getKeyByValue = (object, value) => Object.keys(object).find(key => object[key] === value);
         const randomColor = size ? getKeyByValue(colorsSizes, size) : colors[Math.floor(Math.random() * colors.length)];
-        const finalSize = size || colorsSizes[randomColor];
 
-        // サイズを指定していない場合はランダムにサイズを決定
+        // サイズを指定していない場合は最初のサイズを使用
         if (!size) {
-            size = randomColor ? colorsSizes[randomColor] : 20;
+            size = randomColor ? colorsSizes[randomColor] : sizes[0];
         }
 
         // Matter.jsでの物体定義
@@ -164,6 +165,9 @@ const ball_game = () => {
                 ball.gameObject.fillCircle(ball.position.x, ball.position.y, size);
             }
         });
+
+        addScore(size);
+        console.log(`Score: ${getScore()}`);
     }
 
     function update() { }
